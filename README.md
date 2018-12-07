@@ -1,44 +1,88 @@
 # NgxAxiosAdapter
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) using [Nrwl Nx](https://nrwl.io/nx).
+Axios adapter for  [Angular 6+](https://github.com/angular/angular)
 
-## Nrwl Extensions for Angular (Nx)
+## Installing
 
-<a href="https://nrwl.io/nx"><img src="https://preview.ibb.co/mW6sdw/nx_logo.png"></a>
+```bash
+npm install @ngx-axios-adapter/core
+```
 
-Nx is an open source toolkit for enterprise Angular applications.
+## Usage
 
-Nx is designed to help you create and build enterprise grade Angular applications. It provides an opinionated approach to application project structure and patterns.
+```ts
+import { Injectable } from '@angular/core';
 
-## Quick Start & Documentation
+@Injectable()
+export class ContentService {
 
-[Watch a 5-minute video on how to get started with Nx.](http://nrwl.io/nx)
+  constructor(private readonly axiosAdapter: AxiosAngularAdapterService) { }
 
-## Generate your first application
+  getContent() {
+    const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1', {
+      adapter: this.axiosAdapter.adapter
+    });
 
-Run `ng generate app myapp` to generate an application. When using Nx, you can create multiple applications and libraries in the same CLI workspace. Read more [here](http://nrwl.io/nx).
+    return response.data;
+  }
 
-## Development server
+}
+```
 
-Run `ng serve --project=myapp` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Why
 
-## Code scaffolding
+We do not recommend using any other Http client in an Angular project other than the one provided by the Angular team. However, if you wish to use Axios in place of the Angular HttpClient, or have an indirect reliance upon Axios, the package will ensure your project is still server-side renderable by making all HTTP calls through the Angular HttpClient.
 
-Run `ng generate component component-name --project=myapp` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+One such scenario would be using the Contentful JavaScript SDK for retrieving content for your site. The Contentful SDK includes it's own version of Axios which makes all calls to the Contentful services using the standard Node http or https module. You may notice that when you try to server-side render your app, the app is rendered and sent to the browser before the calls to Contentful are complete thereby defeating the purpose of server-side rendering.
 
-## Build
+While we specifically call out Contentful here, this project is meant as a universal Axios adapter to bridge the gap between Axios and Angular. Feel free to use it in your own projects but you may not see much, if any, benefit unless you are server-side rendering your app.
 
-Run `ng build --project=myapp` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+## Contributing
 
-## Running unit tests
+Contributions in the form of pull requests or opened issues are very welcome.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### Getting Started
 
-## Running end-to-end tests
+This project makes use of the [Angular CLI](https://github.com/angular/angular-cli) using [Nrwl Nx](https://nrwl.io/nx). To get started, make sure you install these tools globally.
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-Before running the tests make sure you are serving the app via `ng serve`.
+```bash
+npm i -g @angular/cli
+npm i -g @nrwl/schematics
+```
 
-## Further help
+### Project Structure
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+The primary code distributed on NPM can be found in `libs/core`. All other code, including code in `apps`, is meant only to support testing and implementation of the library.
+
+### Testing
+
+Unit testing is performed using [Jest](https://github.com/facebook/jest). If you contribute code to the project, you are expected to write tests. Pull requests that lack proper testing will be rejected.
+
+```bash
+# To execute all tests
+npm test
+
+# To execute all tests in watch mode
+npm test -- --watch
+
+# To execute a specific test
+npm test -- axios-angular-adapter.service.ts
+```
+
+### Linting
+
+All code must abide by and pass the linting rules. For the most part, these are the defaults provided for any Angular project so you should be at home in the project. If you believe a change is needed to the lint rules, feel free to open a pull request but be sure to explain the reasoning behind the change.
+
+```bash
+# To run lint checks
+npm run lint
+```
+
+### Building
+
+For the most part, the only code you should ever need to build would be in `libs/core`. However, building will typically only be necessary for releases.
+
+```bash
+# To build the core lib
+npm run build
+```
