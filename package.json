@@ -2,6 +2,26 @@
   "name": "ngx-axios-adapter",
   "version": "0.0.0",
   "license": "MIT",
+  "private": true,
+  "description": "Axios adapter for Angular 6+",
+  "author": {
+    "name": "Patrick Housley",
+    "url": "https://github.com/patrickhousley",
+    "email": "patrick.f.housley@gmail.com"
+  },
+  "keywords": [
+    "angular",
+    "axios",
+    "ssr"
+  ],
+  "homepage": "https://github.com/patrickhousley/ngx-axios-adapter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patrickhousley/ngx-axios-adapter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/patrickhousley/ngx-axios-adapter/issues"
+  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -26,7 +46,6 @@
     "dep-graph": "./node_modules/.bin/nx dep-graph",
     "help": "./node_modules/.bin/nx help"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^7.0.0",
     "@angular/common": "^7.0.0",

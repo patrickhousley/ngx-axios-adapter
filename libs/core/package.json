@@ -1,6 +1,26 @@
 {
   "name": "@ngx-axios-adapter/core",
   "version": "0.0.1",
+  "license": "MIT",
+  "description": "Axios adapter for Angular 6+",
+  "author": {
+    "name": "Patrick Housley",
+    "url": "https://github.com/patrickhousley",
+    "email": "patrick.f.housley@gmail.com"
+  },
+  "keywords": [
+    "angular",
+    "axios",
+    "ssr"
+  ],
+  "homepage": "https://github.com/patrickhousley/ngx-axios-adapter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patrickhousley/ngx-axios-adapter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/patrickhousley/ngx-axios-adapter/issues"
+  },
   "peerDependencies": {
     "@angular/common": "^6.0.0-rc.0 || ^6.0.0",
     "@angular/core": "^6.0.0-rc.0 || ^6.0.0",
