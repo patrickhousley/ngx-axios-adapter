@@ -10,11 +10,25 @@ export class AxiosAngularAdapterService {
 
   get adapter() {
     return (config: AxiosRequestConfig) => {
+      const { method, url, headers, data, auth, params } = config;
 
-      const request = this.httpClient.request(
-        config.method.toUpperCase(),
-        config.url
-      );
+      // Remove content-type for form data
+      if (typeof FormData !== 'undefined' && data instanceof FormData) {
+        delete headers['Content-Type'];
+      }
+
+      // HTTP basic authentication
+      if (auth) {
+        headers.Authorization = `Basic ${btoa(
+          `${auth.username}:${auth.password}`
+        )}`;
+      }
+
+      const request = this.httpClient.request(method.toUpperCase(), url, {
+        body: data,
+        headers,
+        params
+      });
 
       return request.toPromise().then((response: HttpResponse<any>) => {
         return {
@@ -26,6 +40,6 @@ export class AxiosAngularAdapterService {
           request
         };
       });
-    }
+    };
   }
 }
