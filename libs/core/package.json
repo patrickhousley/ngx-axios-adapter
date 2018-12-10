@@ -1,6 +1,6 @@
 {
   "name": "@ngx-axios-adapter/core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "description": "Axios adapter for Angular 6+",
   "author": {
