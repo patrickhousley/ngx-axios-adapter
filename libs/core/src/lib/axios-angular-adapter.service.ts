@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse, HttpErrorResponse, HttpResponseBase } from '@angular/common/http';
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -31,24 +33,84 @@ export class AxiosAngularAdapterService {
         observe: 'response'
       });
 
-      return request.toPromise().then((response: HttpResponse<T>) => {
-        const responseHeaders = response.headers.keys().reduce((headersColl, headerKey) => {
-          if (response.headers.has(headerKey)) {
-            headersColl[headerKey] = response.headers.get(headerKey);
-          }
+      return request.pipe(
+        catchError(this.handleFailure(config, request)),
+        map(this.handleSuccess<T>(config, request))
+      ).toPromise() as Promise<AxiosResponse<T>>;
+    };
+  }
 
-          return headersColl;
-        }, {});
-
+  private handleSuccess<T>(config: AxiosRequestConfig, request: Observable<HttpResponse<Object>>) {
+    return (response: HttpResponse<T>): AxiosResponse<T> => {
+      if (!config.validateStatus || config.validateStatus(response.status)) {
         return {
-          data: response.body,
-          status: response.status,
-          statusText: response.statusText,
-          headers: responseHeaders,
+          ...this.convertResponse(response),
           config: config,
           request
         };
-      });
+      } else {
+        throw this.createError(
+          `Request failed with status code ${response.status}`,
+          config,
+          null,
+          request,
+          response
+        );
+      }
+    }
+  }
+
+  private handleFailure(config: AxiosRequestConfig, request: Observable<HttpResponse<Object>>) {
+    return (response: HttpErrorResponse): Observable<never> => {
+      return throwError(this.createError(
+        response.message,
+        config,
+        response.name,
+        request,
+        response
+      ));
+    }
+  }
+
+  private convertResponse<T>(response: HttpResponse<T> | HttpErrorResponse): Pick<AxiosResponse<T>, 'data' | 'status' | 'statusText' | 'headers'> {
+    const responseHeaders = response.headers.keys().reduce((headersColl, headerKey) => {
+      if (response.headers.has(headerKey)) {
+        headersColl[headerKey] = response.headers.get(headerKey);
+      }
+
+      return headersColl;
+    }, {});
+
+    return {
+      data: this.responseIsError(response) ? response.error : response.body,
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders
     };
+  }
+
+  private createError<T>(message?: string, config?: AxiosRequestConfig, code?: string, request?: Observable<HttpResponse<Object>>, response?: HttpResponse<T> | HttpErrorResponse) {
+    const error = new Error(message);
+    return this.enhanceError(error as AxiosError, config, code, request, response);
+  }
+
+  private enhanceError<T>(error?: AxiosError, config?: AxiosRequestConfig, code?: string, request?: Observable<HttpResponse<Object>>, response?: HttpResponse<T> | HttpErrorResponse) {
+    error.config = config;
+    if (code) {
+      error.code = code;
+    }
+
+    error.request = request;
+    error.response = {
+      ...this.convertResponse(response),
+      config: config,
+      request
+    };
+
+    return error;
+  }
+
+  private responseIsError(response: HttpResponseBase): response is HttpErrorResponse {
+    return (<Object>response).hasOwnProperty('error');
   }
 }

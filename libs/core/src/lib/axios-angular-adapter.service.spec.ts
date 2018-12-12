@@ -6,6 +6,7 @@ import {
 import { Observable } from 'rxjs';
 import * as Chance from 'chance';
 import { AxiosAngularAdapterService } from './axios-angular-adapter.service';
+import { AxiosError } from 'axios';
 
 describe('AxiosAngularAdapterService', () => {
   const chance = new Chance();
@@ -150,41 +151,6 @@ describe('AxiosAngularAdapterService', () => {
       expect(req.request.params.has(param)).toEqual(true);
       expect(req.request.params.get(param)).toEqual(params[param]);
     });
-  });
-
-  it('should include the ', async () => {
-    // Arrange
-    const url = chance.url();
-    const method = 'get';
-    const params = {
-      [chance.guid()]: chance.word(),
-      [chance.guid()]: chance.word(),
-      [chance.guid()]: chance.word(),
-      [chance.guid()]: chance.word(),
-      [chance.guid()]: chance.word()
-    };
-    const paramString = Object.keys(params)
-    .map(param => `${param}=${params[param]}`)
-    .join('&');
-    const expected = {
-      [chance.guid()]: chance.word(),
-      [chance.guid()]: chance.word(),
-      [chance.guid()]: chance.word(),
-      [chance.guid()]: chance.word(),
-      [chance.guid()]: chance.word()
-    };
-
-    // Act / Assert
-    service.adapter({ url, method, params })
-      .then(response => expect(response.data).toEqual(expected));
-    const req = httpMock.expectOne(`${url}?${paramString}`);
-    req.flush(
-      expected,
-      {
-        status: 200,
-        statusText: 'OK'
-      }
-    );
   });
 
   describe('successful responses', () => {
@@ -359,6 +325,200 @@ describe('AxiosAngularAdapterService', () => {
         .catch(error => done(error));
       const req = httpMock.expectOne(`${url}?${paramString}`);
       req.flush('');
+    });
+  });
+
+  describe('failure responses', () => {
+    it('should include the response data in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const expected = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+
+      // Act / Assert
+      service.adapter({ url, method })
+        .then(() => {
+          done('Request should have failed');
+        })
+        .catch((error: AxiosError) => {
+          expect(error.response.data).toEqual(expected);
+          done();
+        });
+      const req = httpMock.expectOne(url);
+      req.flush(expected, { status: chance.integer({ min: 400, max: 407 }), statusText: chance.word() });
+    });
+
+    it('should include the response status in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const expected = chance.integer({ min: 400, max: 407 });
+
+      // Act / Assert
+      service.adapter({ url, method })
+        .then(() => {
+          done('Request should have failed');
+        })
+        .catch((error: AxiosError) => {
+          expect(error.response.status).toEqual(expected);
+          done();
+        });
+      const req = httpMock.expectOne(url);
+      req.flush('', { status: expected, statusText: chance.word() });
+    });
+
+    it('should include the response statusText in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const expected = chance.word();
+
+      // Act / Assert
+      service.adapter({ url, method })
+        .then(() => {
+          done('Request should have failed');
+        })
+        .catch((error: AxiosError) => {
+          expect(error.response.statusText).toEqual(expected);
+          done();
+        });
+      const req = httpMock.expectOne(url);
+      req.flush('', { status: chance.integer({ min: 400, max: 407 }), statusText: expected });
+    });
+
+    it('should include the response headers in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const expected = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+
+      // Act / Assert
+      service.adapter({ url, method })
+        .then(() => {
+          done('Request should have failed');
+        })
+        .catch((error: AxiosError) => {
+          expect(error.response.headers).toEqual(expected);
+          done();
+        });
+      const req = httpMock.expectOne(url);
+      req.flush('', { status: chance.integer({ min: 400, max: 407 }), statusText: chance.word(), headers: expected });
+    });
+
+    it('should include the request config in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const expected = { url, method };
+
+      // Act / Assert
+      service.adapter({ url, method })
+        .then(() => {
+          done('Request should have failed');
+        })
+        .catch((error: AxiosError) => {
+          expect(error.response.config).toEqual(expected);
+          expect(error.config).toEqual(expected);
+          expect(error.config).toEqual(error.response.config);
+          done();
+        });
+      const req = httpMock.expectOne(url);
+      req.flush('', { status: chance.integer({ min: 400, max: 407 }), statusText: chance.word() });
+    });
+
+    it('should include the request observable in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+
+      // Act / Assert
+      service.adapter({ url, method })
+        .then(() => {
+          done('Request should have failed');
+        })
+        .catch((error: AxiosError) => {
+          expect(error.response.request).toBeInstanceOf(Observable);
+          expect(error.request).toBeInstanceOf(Observable);
+          expect(error.request).toEqual(error.response.request);
+          done();
+        });
+      const req = httpMock.expectOne(url);
+      req.flush('', { status: chance.integer({ min: 400, max: 407 }), statusText: chance.word() });
+    });
+
+    it('should include the response code in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+
+      // Act / Assert
+      service.adapter({ url, method })
+        .then(() => {
+          done('Request should have failed');
+        })
+        .catch((error: AxiosError) => {
+          expect(error.code).toEqual('HttpErrorResponse');
+          done();
+        });
+      const req = httpMock.expectOne(url);
+      req.flush('', { status: chance.integer({ min: 400, max: 407 }), statusText: chance.word() });
+    });
+  });
+
+  describe('axios support', () => {
+    it('should support axios validateStatus method', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const status = chance.integer({ min: 200, max: 207 })
+      const validateStatus = jest.fn(() => true);
+
+      // Act / Assert
+      service.adapter({ url, method, validateStatus })
+        .then(() => {
+          expect(validateStatus).toHaveBeenCalledTimes(1);
+          expect(validateStatus).toHaveBeenCalledWith(status)
+          done();
+        })
+        .catch(error => {
+          done(error);
+        });
+      const req = httpMock.expectOne(url);
+      req.flush('', { status, statusText: chance.word() });
+    });
+
+    it('should reject with an axios error when validateStatus returns false', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const validateStatus = jest.fn(() => false);
+
+      // Act / Assert
+      service.adapter({ url, method, validateStatus })
+        .then(() => {
+          done('Request should have failed');
+        })
+        .catch((error: AxiosError) => {
+          expect(validateStatus).toHaveBeenCalledTimes(1);
+          expect(error.request).toBeDefined();
+          expect(error.response).toBeDefined();
+          expect(error.request).toEqual(error.response.request);
+          done();
+        });
+      const req = httpMock.expectOne(url);
+      req.flush('', { status: chance.integer({ min: 200, max: 207 }), statusText: chance.word() });
     });
   });
 });
