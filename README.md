@@ -1,5 +1,9 @@
 # NgxAxiosAdapter
 
+[![npm version](https://badge.fury.io/js/%40ngx-axios-adapter%2Fcore.svg)](https://badge.fury.io/js/%40ngx-axios-adapter%2Fcore)
+[![CircleCI](https://circleci.com/gh/patrickhousley/ngx-axios-adapter/tree/master.svg?style=svg)](https://circleci.com/gh/patrickhousley/ngx-axios-adapter/tree/master)
+[![Coverage Status](https://coveralls.io/repos/github/patrickhousley/ngx-axios-adapter/badge.svg)](https://coveralls.io/github/patrickhousley/ngx-axios-adapter)
+
 Axios adapter for  [Angular 6+](https://github.com/angular/angular)
 
 ## Installing
