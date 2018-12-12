@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpResponse, HttpErrorResponse, HttpResponseBase } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpResponse,
+  HttpErrorResponse,
+  HttpResponseBase
+} from '@angular/common/http';
 import { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -33,14 +38,19 @@ export class AxiosAngularAdapterService {
         observe: 'response'
       });
 
-      return request.pipe(
-        catchError(this.handleFailure(config, request)),
-        map(this.handleSuccess<T>(config, request))
-      ).toPromise() as Promise<AxiosResponse<T>>;
+      return request
+        .pipe(
+          catchError(this.handleFailure(config, request)),
+          map(this.handleSuccess<T>(config, request))
+        )
+        .toPromise() as Promise<AxiosResponse<T>>;
     };
   }
 
-  private handleSuccess<T>(config: AxiosRequestConfig, request: Observable<HttpResponse<Object>>) {
+  private handleSuccess<T>(
+    config: AxiosRequestConfig,
+    request: Observable<HttpResponse<Object>>
+  ) {
     return (response: HttpResponse<T>): AxiosResponse<T> => {
       if (!config.validateStatus || config.validateStatus(response.status)) {
         return {
@@ -57,29 +67,38 @@ export class AxiosAngularAdapterService {
           response
         );
       }
-    }
+    };
   }
 
-  private handleFailure(config: AxiosRequestConfig, request: Observable<HttpResponse<Object>>) {
+  private handleFailure(
+    config: AxiosRequestConfig,
+    request: Observable<HttpResponse<Object>>
+  ) {
     return (response: HttpErrorResponse): Observable<never> => {
-      return throwError(this.createError(
-        response.message,
-        config,
-        response.name,
-        request,
-        response
-      ));
-    }
+      return throwError(
+        this.createError(
+          response.message,
+          config,
+          response.name,
+          request,
+          response
+        )
+      );
+    };
   }
 
-  private convertResponse<T>(response: HttpResponse<T> | HttpErrorResponse): Pick<AxiosResponse<T>, 'data' | 'status' | 'statusText' | 'headers'> {
-    const responseHeaders = response.headers.keys().reduce((headersColl, headerKey) => {
-      if (response.headers.has(headerKey)) {
-        headersColl[headerKey] = response.headers.get(headerKey);
-      }
+  private convertResponse<T>(
+    response: HttpResponse<T> | HttpErrorResponse
+  ): Pick<AxiosResponse<T>, 'data' | 'status' | 'statusText' | 'headers'> {
+    const responseHeaders = response.headers
+      .keys()
+      .reduce((headersColl, headerKey) => {
+        if (response.headers.has(headerKey)) {
+          headersColl[headerKey] = response.headers.get(headerKey);
+        }
 
-      return headersColl;
-    }, {});
+        return headersColl;
+      }, {});
 
     return {
       data: this.responseIsError(response) ? response.error : response.body,
@@ -89,12 +108,30 @@ export class AxiosAngularAdapterService {
     };
   }
 
-  private createError<T>(message?: string, config?: AxiosRequestConfig, code?: string, request?: Observable<HttpResponse<Object>>, response?: HttpResponse<T> | HttpErrorResponse) {
+  private createError<T>(
+    message?: string,
+    config?: AxiosRequestConfig,
+    code?: string,
+    request?: Observable<HttpResponse<Object>>,
+    response?: HttpResponse<T> | HttpErrorResponse
+  ) {
     const error = new Error(message);
-    return this.enhanceError(error as AxiosError, config, code, request, response);
+    return this.enhanceError(
+      error as AxiosError,
+      config,
+      code,
+      request,
+      response
+    );
   }
 
-  private enhanceError<T>(error?: AxiosError, config?: AxiosRequestConfig, code?: string, request?: Observable<HttpResponse<Object>>, response?: HttpResponse<T> | HttpErrorResponse) {
+  private enhanceError<T>(
+    error?: AxiosError,
+    config?: AxiosRequestConfig,
+    code?: string,
+    request?: Observable<HttpResponse<Object>>,
+    response?: HttpResponse<T> | HttpErrorResponse
+  ) {
     error.config = config;
     if (code) {
       error.code = code;
@@ -110,7 +147,9 @@ export class AxiosAngularAdapterService {
     return error;
   }
 
-  private responseIsError(response: HttpResponseBase): response is HttpErrorResponse {
+  private responseIsError(
+    response: HttpResponseBase
+  ): response is HttpErrorResponse {
     return (<Object>response).hasOwnProperty('error');
   }
 }
