@@ -36,13 +36,13 @@ jobs:
           key: node-dependencies-{{ checksum "package.json" }}
       - run:
           name: "Running Jest Tests"
-          command: npm test -- --ci
-          environment:
-            JEST_JUNIT_OUTPUT: "coverage/junit/js-test-results.xml"
+          command: |
+            npm test -- --ci
+            find coverage -name "lcov.info" -exec cat {} \; | ./node_modules/coveralls/bin/coveralls.js
       - store_test_results:
-          path: coverage/junit
+          path: coverage/
       - store_artifacts:
-          path: coverage/junit
+          path: coverage/
   build:
     <<: *defaults
     steps:

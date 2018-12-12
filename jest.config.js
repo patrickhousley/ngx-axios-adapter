@@ -6,16 +6,6 @@ module.exports = {
   resolver: '@nrwl/builders/plugins/jest/resolver',
   moduleFileExtensions: ['ts', 'js', 'html'],
   collectCoverage: true,
-  coverageReporters: ['html'],
-  setupTestFrameworkScriptFile: 'jest-preset-angular/setupJest.js',
-  reporters: [
-    'default',
-    [
-      'jest-junit',
-      {
-        suiteName: 'ngx-axios-adapter tests',
-        outputDirectory: 'coverage/junit/'
-      }
-    ]
-  ]
+  coverageReporters: ['html', 'lcov'],
+  setupTestFrameworkScriptFile: 'jest-preset-angular/setupJest.js'
 };
