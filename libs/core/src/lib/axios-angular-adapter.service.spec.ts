@@ -3,6 +3,7 @@ import {
   HttpClientTestingModule,
   HttpTestingController
 } from '@angular/common/http/testing';
+import { Observable } from 'rxjs';
 import * as Chance from 'chance';
 import { AxiosAngularAdapterService } from './axios-angular-adapter.service';
 
@@ -42,11 +43,11 @@ describe('AxiosAngularAdapterService', () => {
 
     // Act
     service.adapter({ url, method });
+    const req = httpMock.expectOne(url);
+    req.flush('');
 
     // Assert
-    const req = httpMock.expectOne(url);
     expect(req.request.method).toEqual('GET');
-    req.flush('');
   });
 
   it('should send provided headers', () => {
@@ -63,14 +64,14 @@ describe('AxiosAngularAdapterService', () => {
 
     // Act
     service.adapter({ url, method, headers });
+    const req = httpMock.expectOne(url);
+    req.flush('');
 
     // Assert
-    const req = httpMock.expectOne(url);
     Object.keys(headers).forEach(header => {
       expect(req.request.headers.has(header)).toEqual(true);
       expect(req.request.headers.get(header)).toEqual(headers[header]);
     });
-    req.flush('');
   });
 
   it('should remove the content type header when form data is being submitted', () => {
@@ -89,9 +90,10 @@ describe('AxiosAngularAdapterService', () => {
 
     // Act
     service.adapter({ url, method, headers, data });
+    const req = httpMock.expectOne(url);
+    req.flush('');
 
     // Assert
-    const req = httpMock.expectOne(url);
     Object.keys(headers).forEach(header => {
       if (header === 'Content-Type') {
         expect(req.request.headers.has(header)).toEqual(false);
@@ -100,7 +102,6 @@ describe('AxiosAngularAdapterService', () => {
         expect(req.request.headers.get(header)).toEqual(headers[header]);
       }
     });
-    req.flush('');
   });
 
   it('should support basic authentication', () => {
@@ -114,14 +115,14 @@ describe('AxiosAngularAdapterService', () => {
 
     // Act
     service.adapter({ url, method, auth, headers: {} });
+    const req = httpMock.expectOne(url);
+    req.flush('');
 
     // Assert
-    const req = httpMock.expectOne(url);
     expect(req.request.headers.has('Authorization')).toEqual(true);
     expect(req.request.headers.get('Authorization')).toEqual(
       `Basic ${btoa(`${auth.username}:${auth.password}`)}`
     );
-    req.flush('');
   });
 
   it('should send request params', () => {
@@ -136,18 +137,228 @@ describe('AxiosAngularAdapterService', () => {
       [chance.guid()]: chance.word()
     };
     const paramString = Object.keys(params)
-      .map(param => `${param}=${params[param]}`)
-      .join('&');
+    .map(param => `${param}=${params[param]}`)
+    .join('&');
 
     // Act
     service.adapter({ url, method, params });
+    const req = httpMock.expectOne(`${url}?${paramString}`);
+    req.flush('');
 
     // Assert
-    const req = httpMock.expectOne(`${url}?${paramString}`);
     Object.keys(params).forEach(param => {
       expect(req.request.params.has(param)).toEqual(true);
       expect(req.request.params.get(param)).toEqual(params[param]);
     });
-    req.flush('');
+  });
+
+  it('should include the ', async () => {
+    // Arrange
+    const url = chance.url();
+    const method = 'get';
+    const params = {
+      [chance.guid()]: chance.word(),
+      [chance.guid()]: chance.word(),
+      [chance.guid()]: chance.word(),
+      [chance.guid()]: chance.word(),
+      [chance.guid()]: chance.word()
+    };
+    const paramString = Object.keys(params)
+    .map(param => `${param}=${params[param]}`)
+    .join('&');
+    const expected = {
+      [chance.guid()]: chance.word(),
+      [chance.guid()]: chance.word(),
+      [chance.guid()]: chance.word(),
+      [chance.guid()]: chance.word(),
+      [chance.guid()]: chance.word()
+    };
+
+    // Act / Assert
+    service.adapter({ url, method, params })
+      .then(response => expect(response.data).toEqual(expected));
+    const req = httpMock.expectOne(`${url}?${paramString}`);
+    req.flush(
+      expected,
+      {
+        status: 200,
+        statusText: 'OK'
+      }
+    );
+  });
+
+  describe('successful responses', () => {
+    it('should include the response data in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const params = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+      const paramString = Object.keys(params)
+      .map(param => `${param}=${params[param]}`)
+      .join('&');
+      const expected = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+
+      // Act / Assert
+      service.adapter({ url, method, params })
+        .then(response => {
+          expect(response.data).toEqual(expected);
+          done();
+        })
+        .catch(error => done(error));
+      const req = httpMock.expectOne(`${url}?${paramString}`);
+      req.flush(expected);
+    });
+
+    it('should include the response status in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const params = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+      const paramString = Object.keys(params)
+      .map(param => `${param}=${params[param]}`)
+      .join('&');
+      const expected = chance.integer({ min: 200, max: 207 });
+
+      // Act / Assert
+      service.adapter({ url, method, params })
+        .then(response => {
+          expect(response.status).toEqual(expected);
+          done();
+        })
+        .catch(error => done(error));
+      const req = httpMock.expectOne(`${url}?${paramString}`);
+      req.flush('', { status: expected, statusText: chance.word() });
+    });
+
+    it('should include the response statusText in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const params = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+      const paramString = Object.keys(params)
+      .map(param => `${param}=${params[param]}`)
+      .join('&');
+      const expected = chance.word();
+
+      // Act / Assert
+      service.adapter({ url, method, params })
+        .then(response => {
+          expect(response.statusText).toEqual(expected);
+          done();
+        })
+        .catch(error => done(error));
+      const req = httpMock.expectOne(`${url}?${paramString}`);
+      req.flush('', { statusText: expected });
+    });
+
+    it('should include the response headers in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const params = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+      const paramString = Object.keys(params)
+      .map(param => `${param}=${params[param]}`)
+      .join('&');
+      const expected = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+
+      // Act / Assert
+      service.adapter({ url, method, params })
+        .then(response => {
+          expect(response.headers).toEqual(expected);
+          done();
+        })
+        .catch(error => done(error));
+      const req = httpMock.expectOne(`${url}?${paramString}`);
+      req.flush('', { headers: expected });
+    });
+
+    it('should include the request config in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const params = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+      const paramString = Object.keys(params)
+      .map(param => `${param}=${params[param]}`)
+      .join('&');
+      const expected = { url, method, params };
+
+      // Act / Assert
+      service.adapter({ url, method, params })
+        .then(response => {
+          expect(response.config).toEqual(expected);
+          done();
+        })
+        .catch(error => done(error));
+      const req = httpMock.expectOne(`${url}?${paramString}`);
+      req.flush('');
+    });
+
+    it('should include the request observable in the returned object', done => {
+      // Arrange
+      const url = chance.url();
+      const method = 'get';
+      const params = {
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word(),
+        [chance.guid()]: chance.word()
+      };
+      const paramString = Object.keys(params)
+      .map(param => `${param}=${params[param]}`)
+      .join('&');
+
+      // Act / Assert
+      service.adapter({ url, method, params })
+        .then(response => {
+          expect(response.request).toBeInstanceOf(Observable);
+          done();
+        })
+        .catch(error => done(error));
+      const req = httpMock.expectOne(`${url}?${paramString}`);
+      req.flush('');
+    });
   });
 });
