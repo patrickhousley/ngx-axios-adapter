@@ -1,0 +1,65 @@
+# Default settings
+defaults: &defaults
+  working_directory: ~/project
+  docker:
+    - image: circleci/node:8.14
+
+version: 2
+jobs:
+  install:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: node-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: "Installing Node Modules"
+          command: npm i
+      - save_cache:
+          paths:
+            - node_modules
+          key: node-dependencies-{{ checksum "package.json" }}
+  lint:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: node-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: "Typescript Linting"
+          command: npm run lint
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: node-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: "Running Jest Tests"
+          command: npm test -- --ci
+          environment:
+            JEST_JUNIT_OUTPUT: "coverage/junit/js-test-results.xml"
+      - store_test_results:
+          path: coverage/junit
+      - store_artifacts:
+          path: coverage/junit
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: node-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: "Building"
+          command: npm run build
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - install
+      - lint:
+          requires:
+            - install
+      - test:
+          requires:
+            - install

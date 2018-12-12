@@ -7,5 +7,15 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'html'],
   collectCoverage: true,
   coverageReporters: ['html'],
-  setupTestFrameworkScriptFile: 'jest-preset-angular/setupJest.js'
+  setupTestFrameworkScriptFile: 'jest-preset-angular/setupJest.js',
+  reporters: [
+    'default',
+    [
+      'jest-junit',
+      {
+        suiteName: 'ngx-axios-adapter tests',
+        outputDirectory: 'coverage/junit/'
+      }
+    ]
+  ]
 };
