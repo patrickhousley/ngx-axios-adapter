@@ -1,6 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "importHelpers": true,
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",
@@ -19,7 +20,8 @@
       "@ngx-axios-adapter/core": [
         "libs/core/src/index.ts"
       ]
-    }
+    },
+    "module": "es2015"
   },
   "exclude": [
     "node_modules",
