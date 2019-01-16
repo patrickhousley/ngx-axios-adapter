@@ -33,6 +33,24 @@ export class ContentService {
 }
 ```
 
+### With contenful
+```ts
+import { createClient } from 'contentful';
+import { AxiosAngularAdapterService } from '@ngx-axios-adapter/core';
+
+export class ContentfulService {
+  constructor(private readonly axiosAdapter: AxiosAngularAdapterService) {
+    createClient({
+      // your own config
+      space: CONFIG.space,
+      accessToken: CONFIG.accessToken,
+      // pass the adapter to contentful
+      adapter: this.axiosAdapter.adapter
+    });
+  }
+}
+```
+
 ## Why
 
 We do not recommend using any other Http client in an Angular project other than the one provided by the Angular team. However, if you wish to use Axios in place of the Angular HttpClient, or have an indirect reliance upon Axios, the package will ensure your project is still server-side renderable by making all HTTP calls through the Angular HttpClient.
