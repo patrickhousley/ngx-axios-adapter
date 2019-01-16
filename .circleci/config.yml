@@ -43,14 +43,23 @@ jobs:
           path: coverage/
       - store_artifacts:
           path: coverage/
-  build:
+  format-check:
     <<: *defaults
     steps:
       - checkout
       - restore_cache:
           key: node-dependencies-{{ checksum "package.json" }}
       - run:
-          name: "Building"
+          name: "Checking File Formatting"
+          command: npm run format:check
+  build-core:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: node-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: "Building Core"
           command: npm run build
 workflows:
   version: 2
@@ -61,5 +70,11 @@ workflows:
           requires:
             - install
       - test:
+          requires:
+            - install
+      - format-check:
+          requires:
+            - install
+      - build-core:
           requires:
             - install
