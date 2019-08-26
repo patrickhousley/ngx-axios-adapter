@@ -2,7 +2,7 @@
 defaults: &defaults
   working_directory: ~/project
   docker:
-    - image: circleci/node:8.14
+    - image: circleci/node:10.16.3
 
 version: 2
 jobs:
