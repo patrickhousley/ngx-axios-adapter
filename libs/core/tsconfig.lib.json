@@ -11,8 +11,8 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "types": [],
-    "lib": ["dom", "es2018"]
+    "types": ["node"],
+    "lib": ["dom"]
   },
   "angularCompilerOptions": {
     "annotateForClosureCompiler": true,

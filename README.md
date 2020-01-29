@@ -4,7 +4,7 @@
 [![CircleCI](https://circleci.com/gh/patrickhousley/ngx-axios-adapter/tree/master.svg?style=svg)](https://circleci.com/gh/patrickhousley/ngx-axios-adapter/tree/master)
 [![Coverage Status](https://coveralls.io/repos/github/patrickhousley/ngx-axios-adapter/badge.svg)](https://coveralls.io/github/patrickhousley/ngx-axios-adapter)
 
-Axios adapter for  [Angular 6+](https://github.com/angular/angular)
+Axios adapter for [Angular 6+](https://github.com/angular/angular)
 
 ## Installing
 
@@ -19,21 +19,23 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class ContentService {
-
-  constructor(private readonly axiosAdapter: AxiosAngularAdapterService) { }
+  constructor(private readonly axiosAdapter: AxiosAngularAdapterService) {}
 
   getContent() {
-    const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1', {
-      adapter: this.axiosAdapter.adapter
-    });
+    const response = await axios.get(
+      'https://jsonplaceholder.typicode.com/todos/1',
+      {
+        adapter: this.axiosAdapter.adapter
+      }
+    );
 
     return response.data;
   }
-
 }
 ```
 
 ### With contenful
+
 ```ts
 import { createClient } from 'contentful';
 import { AxiosAngularAdapterService } from '@ngx-axios-adapter/core';

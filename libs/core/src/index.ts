@@ -1,3 +1,1 @@
-export {
-  AxiosAngularAdapterService
-} from './lib/axios-angular-adapter.service';
+export { AxiosAngularAdapterService } from './lib/axios-angular-adapter.service';
