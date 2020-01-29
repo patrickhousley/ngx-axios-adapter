@@ -72,7 +72,8 @@
             "sourceTag": "*",
             "onlyDependOnLibsWithTags": ["*"]
           }
-        ]
+        ],
+        "enforceBuildableLibDependency": true
       }
     ]
   }

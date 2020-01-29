@@ -10,7 +10,7 @@
       "prefix": "ngx-axios-adapter",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-ng-packagr:build",
+          "builder": "@nrwl/angular:package",
           "options": {
             "tsConfig": "libs/core/tsconfig.lib.json",
             "project": "libs/core/ng-package.json"
