@@ -124,6 +124,7 @@ describe('AxiosAngularAdapterService', () => {
     expect(req.request.headers.get('Authorization')).toEqual(
       `Basic ${btoa(`${auth.username}:${auth.password}`)}`
     );
+    console.log(btoa(`${auth.username}:${auth.password}`))
   });
 
   it('should send request params', () => {

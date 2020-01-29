@@ -26,9 +26,9 @@ export class AxiosAngularAdapterService {
 
       // HTTP basic authentication
       if (auth) {
-        headers.Authorization = `Basic ${btoa(
+        headers.Authorization = `Basic ${Buffer.from(
           `${auth.username}:${auth.password}`
-        )}`;
+        ).toString('base64')}`;
       }
 
       const request = this.httpClient.request(method.toUpperCase(), url, {
