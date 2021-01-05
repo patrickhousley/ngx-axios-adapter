@@ -75,7 +75,7 @@
     "@types/chance": "^1.0.6",
     "@types/jest": "24.0.18",
     "@types/node": "~12.7.2",
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "chance": "^1.0.18",
     "codelyzer": "^5.1.0",
     "coveralls": "^3.0.6",
